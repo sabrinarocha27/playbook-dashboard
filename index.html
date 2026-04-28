@@ -1,3 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>PARTIDAS - Berisso</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    background:#0a0a0a;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    font-family:Arial, sans-serif;
+    overflow:hidden;
+}
+
+.board{
+    background:#111;
+    padding:0 24px 24px;
+    border-radius:8px;
+    box-shadow:0 0 40px rgba(0,0,0,0.9);
+    width:90%;
+    max-width:700px;
+}
+
+/* HEADER AMARILLO */
+.top-banner{
+    background:#f5c400;
+    width:100%;
+    padding:22px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:14px;
+    border-radius:8px 8px 0 0;
+    margin-bottom:28px;
+}
+
+.plane-icon{
+    color:white;
+    font-size:28px;
+}
+
+.banner-title{
+    color:white;
+    font-size:28px;
+    font-weight:900;
+    letter-spacing:6px;
+    text-transform:uppercase;
+}
+
+/* CLOCK */
+.clock-row{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:6px;
+}
+
+.flap{
+    background:linear-gradient(180deg,#222 50%,#1a1a1a 50%);
+    color:#f5f1dc;
+    position:relative;
+    border-radius:5px;
+    box-shadow:
+        inset 0 2px 4px rgba(255,255,255,0.06),
+        inset 0 -4px 8px rgba(0,0,0,0.6),
+        0 4px 12px rgba(0,0,0,0.5);
+
+    width:13%;
+    padding-top:15%;
+    height:0;
+}
+
+.flap-inner{
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:5.5vw;
+    font-weight:bold;
+}
+
+@media (min-width:600px){
+    .flap-inner{
+        font-size:52px;
+    }
+}
+
+.flap:after{
+    content:"";
+    position:absolute;
+    width:100%;
+    height:2px;
+    background:#000;
+    top:50%;
+    left:0;
+}
+
+.separator{
+    color:#666;
+    font-size:5vw;
+    line-height:1;
+    flex-shrink:0;
+}
+
+@media (min-width:600px){
+    .separator{
+        font-size:44px;
+    }
+}
+
+/* DATE */
+.date-row{
+    text-align:center;
+    margin-top:22px;
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.date-chip{
+    background:#1a1a1a;
+    border:1px solid #2a2a2a;
+    border-radius:3px;
+    color:#888;
+    font-size:13px;
+    letter-spacing:2px;
+    padding:5px 10px;
+    text-transform:uppercase;
+}
+
+/* FOOTER */
+.footer{
+    text-align:center;
+    color:white;
+    margin-top:24px;
+    font-size:18px;
+    font-weight:900;
+    letter-spacing:3px;
+    text-transform:uppercase;
+}
+
+/* efecto simple */
+.flap{
+    transition:opacity .1s ease;
+}
+</style>
+</head>
+<body>
+
+<div class="board">
+
+    <div class="top-banner">
+        <div class="plane-icon">✈</div>
+        <div class="banner-title">PARTIDAS</div>
+    </div>
+
+    <div class="clock-row">
+        <div class="flap" id="h1"><div class="flap-inner">0</div></div>
+        <div class="flap" id="h2"><div class="flap-inner">0</div></div>
+
+        <div class="separator">:</div>
+
+        <div class="flap" id="m1"><div class="flap-inner">0</div></div>
+        <div class="flap" id="m2"><div class="flap-inner">0</div></div>
+
+        <div class="separator">:</div>
+
+        <div class="flap" id="s1"><div class="flap-inner">0</div></div>
+        <div class="flap" id="s2"><div class="flap-inner">0</div></div>
+    </div>
+
+    <div class="date-row">
+        <div class="date-chip" id="date-day">LUN</div>
+        <div class="date-chip" id="date-num">01</div>
+        <div class="date-chip" id="date-mon">ENE</div>
+        <div class="date-chip" id="date-yr">2025</div>
+    </div>
+
+    <div class="footer">
+        BERISSO, BUENOS AIRES, ARGENTINA
+    </div>
+
+</div>
+
 <script>
 var timer = null;
 
@@ -18,10 +218,8 @@ function setFlap(id, value){
     if(!inner) return;
 
     if(inner.textContent !== value){
-
         inner.textContent = value;
 
-        // animación simple compatible
         el.style.opacity = "0.6";
 
         setTimeout(function(){
@@ -39,24 +237,15 @@ function updateClock(){
 
     setFlap("h1", hours.charAt(0));
     setFlap("h2", hours.charAt(1));
-
     setFlap("m1", minutes.charAt(0));
     setFlap("m2", minutes.charAt(1));
-
     setFlap("s1", seconds.charAt(0));
     setFlap("s2", seconds.charAt(1));
 
-    document.getElementById("date-day").textContent =
-        DAYS[now.getDay()];
-
-    document.getElementById("date-num").textContent =
-        pad(now.getDate());
-
-    document.getElementById("date-mon").textContent =
-        MONTHS[now.getMonth()];
-
-    document.getElementById("date-yr").textContent =
-        now.getFullYear();
+    document.getElementById("date-day").textContent = DAYS[now.getDay()];
+    document.getElementById("date-num").textContent = pad(now.getDate());
+    document.getElementById("date-mon").textContent = MONTHS[now.getMonth()];
+    document.getElementById("date-yr").textContent = now.getFullYear();
 }
 
 function startClock(){
@@ -75,3 +264,6 @@ window.onload = function(){
     startClock();
 };
 </script>
+
+</body>
+</html>
