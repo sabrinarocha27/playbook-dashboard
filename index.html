@@ -14,8 +14,14 @@ body{
     padding:30px;
 }
 
+h1{
+    font-size:24px;
+}
+
 .clock{
     font-size:60px;
+    font-family:Courier New, monospace;
+    line-height:1;
     margin-bottom:20px;
 }
 
@@ -64,11 +70,23 @@ button{
 <script>
 var city = localStorage.getItem("city") || "";
 
+function pad(n){
+    return n < 10 ? "0" + n : n;
+}
+
 function updateClock(){
     var now = new Date();
 
-    var time = now.toLocaleTimeString();
-    var date = now.toLocaleDateString();
+    var hours = pad(now.getHours());
+    var minutes = pad(now.getMinutes());
+    var seconds = pad(now.getSeconds());
+
+    var day = pad(now.getDate());
+    var month = pad(now.getMonth() + 1);
+    var year = now.getFullYear();
+
+    var time = hours + ":" + minutes + ":" + seconds;
+    var date = day + "/" + month + "/" + year;
 
     document.getElementById("clock").innerHTML = time;
     document.getElementById("date").innerHTML = date;
