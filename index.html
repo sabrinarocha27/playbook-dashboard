@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PARTIDAS</title>
+<title>PARTIDAS - BERISSO</title>
 
 <style>
 body{
@@ -16,6 +16,7 @@ body{
     font-family:Arial, sans-serif;
 }
 
+/* tablero principal */
 .board{
     width:900px;
     background:#111;
@@ -24,50 +25,52 @@ body{
     box-shadow:0 0 30px rgba(0,0,0,0.8);
 }
 
-/* HEADER AMARILLO */
+/* header amarillo */
 .title-wrap{
-    background:#f5c542;
+    background:#f5c400;
     color:white;
     display:flex;
     justify-content:center;
     align-items:center;
-    gap:14px;
-    padding:18px;
-    margin-bottom:30px;
+    gap:16px;
+    padding:20px;
+    margin-bottom:35px;
     border-radius:4px;
 }
 
 .plane-icon{
-    font-size:28px;
+    font-size:32px;
 }
 
 .title{
-    font-size:28px;
-    font-weight:bold;
-    letter-spacing:6px;
+    font-size:32px;
+    font-weight:900;
+    letter-spacing:8px;
 }
 
-/* CLOCK */
+/* reloj */
 .clock-row{
     display:flex;
     justify-content:center;
-    gap:8px;
+    gap:10px;
 }
 
 .flap{
-    width:90px;
-    height:120px;
+    width:95px;
+    height:125px;
     background:#1c1c1c;
     color:#f5f1dc;
-    font-size:70px;
+    font-size:72px;
     font-weight:bold;
     display:flex;
     justify-content:center;
     align-items:center;
     position:relative;
     border-radius:4px;
+    transition:opacity 0.1s ease;
 }
 
+/* línea central tipo split flap */
 .flap:after{
     content:"";
     position:absolute;
@@ -79,12 +82,13 @@ body{
 }
 
 .separator{
-    color:#777;
-    font-size:70px;
+    color:#666;
+    font-size:72px;
     display:flex;
     align-items:center;
 }
 
+/* fecha */
 .date{
     text-align:center;
     color:#999;
@@ -93,41 +97,40 @@ body{
     letter-spacing:4px;
 }
 
-/* FLIP */
-.flap.flip{
-    animation:flipAnim 0.2s ease;
-}
-
-@keyframes flipAnim{
-    0%{transform:rotateX(0deg);}
-    50%{transform:rotateX(-90deg);}
-    100%{transform:rotateX(0deg);}
-}
-
-/* FOOTER */
+/* footer */
 .footer{
     text-align:center;
     color:white;
-    margin-top:25px;
-    font-size:18px;
+    margin-top:30px;
+    font-size:22px;
     font-weight:900;
-    letter-spacing:2px;
+    letter-spacing:3px;
 }
 
-/* PLAYBOOK */
+/* responsive para PlayBook */
 @media(max-width:1024px){
+
     .board{
         width:95%;
+        padding:20px;
     }
 
     .flap{
         width:60px;
-        height:90px;
-        font-size:45px;
+        height:85px;
+        font-size:42px;
     }
 
     .separator{
-        font-size:45px;
+        font-size:42px;
+    }
+
+    .title{
+        font-size:22px;
+    }
+
+    .footer{
+        font-size:16px;
     }
 }
 </style>
@@ -174,10 +177,14 @@ function setFlap(id,value){
     var el = document.getElementById(id);
 
     if(el.innerHTML !== value){
-        el.classList.remove("flip");
-        void el.offsetWidth;
         el.innerHTML = value;
-        el.classList.add("flip");
+
+        // efecto visual simple compatible
+        el.style.opacity = "0.5";
+
+        setTimeout(function(){
+            el.style.opacity = "1";
+        },100);
     }
 }
 
@@ -199,12 +206,17 @@ function updateClock(){
 
     document.getElementById("date").innerHTML =
         pad(now.getDate()) + " / " +
-        pad(now.getMonth()+1) + " / " +
+        pad(now.getMonth() + 1) + " / " +
         now.getFullYear();
 }
 
+/* inicia reloj */
 updateClock();
-setInterval(updateClock,1000);
+
+/* loop estable para PlayBook */
+window.setInterval(function(){
+    updateClock();
+},1000);
 </script>
 
 </body>
