@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Split-Flap Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600&family=Roboto+Mono:wght@300;400&display=swap');
+:root{--bg:#0f0f0f;--accent:#e8a020;--accent2:#c47a10;--label:#555;--label2:#888;--white:#f0ead6;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'Oswald',sans-serif;color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 12px;}
+.board{width:100%;max-width:520px;background:#111;border-radius:4px;border:1px solid #2a2a2a;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.8),0 0 0 1px #000;}
+.board-header{background:#0a0a0a;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222;}
+.board-title{font-size:10px;letter-spacing:4px;color:var(--label);text-transform:uppercase;font-weight:300;}
+.board-dots{display:flex;gap:5px;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot-r{background:#c0392b;}.dot-y{background:var(--accent);animation:dotblink 2s infinite;}.dot-g{background:#27ae60;}
+@keyframes dotblink{0%,100%{opacity:1}50%{opacity:0.3}}
+.clock-section{padding:20px 16px 14px;border-bottom:1px solid #1e1e1e;}
+.flap-row{display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:8px;}
+.flap-group{display:flex;gap:3px;}
+.flap{width:52px;height:72px;position:relative;perspective:200px;}
+.flap-inner{width:100%;height:100%;position:relative;}
+.flap-top-half{background:linear-gradient(180deg,#2a2a2a,#222);width:100%;height:50%;border-radius:4px 4px 0 0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.04);}
+.flap-bot-half{background:linear-gradient(180deg,#1a1a1a,#161616);width:100%;height:50%;border-radius:0 0 4px 4px;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;position:absolute;bottom:0;box-shadow:0 2px 6px rgba(0,0,0,0.5);}
+.flap-char{font-family:'Oswald',sans-serif;font-size:44px;font-weight:600;color:var(--white);line-height:1;letter-spacing:-1px;user-select:none;-webkit-user-select:none;}
+.flap-top-half .flap-char{transform:translateY(50%);}
+.flap-bot-half .flap-char{transform:translateY(-50%);}
+.flap-gap{position:absolute;top:50%;left:0;right:0;height:2px;background:#000;z-index:5;transform:translateY(-50%);}
+.flap-anim{position:absolute;top:0;left:0;right:0;height:50%;transform-origin:bottom center;transform-style:preserve-3d;border-radius:4px 4px 0 0;overflow:hidden;z-index:10;pointer-events:none;}
+.flap-anim.animating{animation:flipDown 0.22s ease-in forwards;}
+@keyframes flipDown{0%{transform:rotateX(0deg);opacity:1}100%{transform:rotateX(-90deg);opacity:0}}
+.flap-anim-face{background:linear-gradient(180deg,#2e2e2e,#242424);width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;}
+.flap-anim-face .flap-char{transform:translateY(50%);}
+.colon{font-family:'Oswald',sans-serif;font-size:44px;font-weight:300;color:var(--label);line-height:1;margin-bottom:6px;animation:colblink 1s infinite;}
+@keyframes colblink{0%,49%{opacity:1}50%,100%{opacity:0.25}}
+.clock-meta{display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
+.date-flaps{display:flex;gap:3px;align-items:center;}
+.date-flap{background:#1e1e1e;border-radius:3px;padding:3px 7px;font-size:12px;font-weight:400;color:var(--label2);letter-spacing:1px;border:1px solid #2a2a2a;font-family:'Roboto Mono',monospace;}
+.date-sep{color:#333;font-size:10px;}
+.ampm-badge{background:var(--accent);color:#000;font-size:10px;font-weight:600;letter-spacing:2px;padding:3px 8px;border-radius:2px;}
+.section{border-bottom:1px solid #1e1e1e;}
+.section:last-child{border-bottom:none;}
+.section-label{padding:10px 16px 6px;font-size:8px;letter-spacing:4px;color:var(--label);text-transform:uppercase;font-weight:300;display:flex;justify-content:space-between;align-items:center;}
+.section-label span{color:var(--accent);font-size:7px;}
+.weather-inner{padding:4px 16px 14px;display:flex;align-items:center;gap:14px;}
+.weather-icon-wrap{width:56px;height:56px;background:#1e1e1e;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:30px;border:1px solid #2a2a2a;flex-shrink:0;}
+.weather-right{flex:1;}
+.weather-temp-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px;}
+.weather-temp-big{font-size:38px;font-weight:600;color:var(--white);line-height:1;letter-spacing:-1px;}
+.weather-unit{font-size:14px;color:var(--label2);font-weight:300;}
+.weather-desc-txt{font-size:11px;color:var(--label2);letter-spacing:2px;text-transform:uppercase;font-weight:300;margin-bottom:4px;}
+.weather-pills{display:flex;gap:5px;}
+.pill{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:2px;font-size:9px;font-family:'Roboto Mono',monospace;color:var(--label2);padding:2px 6px;letter-spacing:1px;}
+.weather-city{font-size:9px;color:var(--label);letter-spacing:2px;margin-bottom:2px;}
+.cal-inner{padding:4px 16px 14px;display:flex;flex-direction:column;gap:5px;}
+.cal-row{display:flex;align-items:center;gap:10px;padding:6px 8px;background:#1a1a1a;border-radius:3px;border-left:2px solid var(--accent2);}
+.cal-time-col{font-family:'Roboto Mono',monospace;font-size:11px;color:var(--accent);min-width:36px;letter-spacing:1px;}
+.cal-title-col{font-size:11px;color:var(--white);letter-spacing:1px;font-weight:300;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.no-data{font-size:10px;color:var(--label);letter-spacing:3px;padding:8px 0 4px;font-weight:300;}
+.board-footer{background:#0a0a0a;padding:10px 16px;display:flex;gap:6px;border-top:1px solid #1e1e1e;}
+.fbtn{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:3px;color:var(--label2);font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:2px;padding:5px 10px;cursor:pointer;text-transform:uppercase;flex:1;}
+.fbtn.primary{background:var(--accent);color:#000;border-color:var(--accent2);font-weight:600;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;align-items:center;justify-content:center;padding:16px;}
+.overlay.on{display:flex;}
+.modal{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:4px;padding:20px;max-width:340px;width:100%;}
+.modal-hd{font-size:13px;letter-spacing:4px;color:var(--accent);margin-bottom:12px;text-transform:uppercase;}
+.modal p{font-size:10px;color:var(--label2);letter-spacing:1px;line-height:1.7;margin-bottom:8px;font-family:'Roboto Mono',monospace;font-weight:300;}
+.modal input{width:100%;background:#111;border:1px solid #333;color:var(--white);font-family:'Roboto Mono',monospace;font-size:10px;padding:8px 10px;margin-bottom:6px;border-radius:2px;letter-spacing:1px;outline:none;}
+.modal-st{font-size:9px;color:var(--accent);letter-spacing:2px;min-height:14px;font-family:'Roboto Mono',monospace;}
+.modal-btns{display:flex;gap:6px;margin-top:10px;justify-content:flex-end;}
+.mbtn{background:var(--accent);color:#000;border:none;font-family:'Oswald',sans-serif;font-size:9px;font-weight:600;letter-spacing:2px;padding:6px 14px;border-radius:2px;cursor:pointer;text-transform:uppercase;}
+.mbtn.sec{background:#2a2a2a;color:var(--label2);}
+.toggle-row{display:flex;gap:6px;margin-bottom:6px;}
+.toggle-btn{flex:1;background:#111;border:1px solid #333;color:var(--label2);font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:2px;padding:7px;border-radius:2px;cursor:pointer;text-transform:uppercase;}
+.toggle-btn.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;}
+</style>
+</head>
+<body>
+<div class="board">
+  <div class="board-header">
+    <span class="board-title">Departures · Control Panel</span>
+    <div class="board-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+  </div>
+  <div class="clock-section">
+    <div class="flap-row">
+      <div class="flap-group">
+        <div class="flap"><div class="flap-inner"><div class="flap-top-half"><span class="flap-char" id="h1-top">0</span></div><div class="flap-bot-half"><span class="flap-char" id="h1-bot">0</span></div><div class="flap-gap"></div><div class="flap-anim" id="h1-anim"><div class="flap-anim-face"><span class="flap-char" id="h1-prev">0</span></div></div></div></div>
+        <div class="flap"><div class="flap-inner"><div class="flap-top-half"><span class="flap-char" id="h2-top">0</span></div><div class="flap-bot-half"><span class="flap-char" id="h2-bot">0</span></div><div class="flap-gap"></div><div class="flap-anim" id="h2-anim"><div class="flap-anim-face"><span class="flap-char" id="h2-prev">0</span></div></div></div></div>
+      </div>
+      <div class="colon">:</div>
+      <div class="flap-group">
+        <div class="flap"><div class="flap-inner"><div class="flap-top-half"><span class="flap-char" id="m1-top">0</span></div><div class="flap-bot-half"><span class="flap-char" id="m1-bot">0</span></div><div class="flap-gap"></div><div class="flap-anim" id="m1-anim"><div class="flap-anim-face"><span class="flap-char" id="m1-prev">0</span></div></div></div></div>
+        <div class="flap"><div class="flap-inner"><div class="flap-top-half"><span class="flap-char" id="m2-top">0</span></div><div class="flap-bot-half"><span class="flap-char" id="m2-bot">0</span></div><div class="flap-gap"></div><div class="flap-anim" id="m2-anim"><div class="flap-anim-face"><span class="flap-char" id="m2-prev">0</span></div></div></div></div>
+      </div>
+      <div class="colon">:</div>
+      <div class="flap-group">
+        <div class="flap"><div class="flap-inner"><div class="flap-top-half"><span class="flap-char" id="s1-top">0</span></div><div class="flap-bot-half"><span class="flap-char" id="s1-bot">0</span></div><div class="flap-gap"></div><div class="flap-anim" id="s1-anim"><div class="flap-anim-face"><span class="flap-char" id="s1-prev">0</span></div></div></div></div>
+        <div class="flap"><div class="flap-inner"><div class="flap-top-half"><span class="flap-char" id="s2-top">0</span></div><div class="flap-bot-half"><span class="flap-char" id="s2-bot">0</span></div><div class="flap-gap"></div><div class="flap-anim" id="s2-anim"><div class="flap-anim-face"><span class="flap-char" id="s2-prev">0</span></div></div></div></div>
+      </div>
+    </div>
+    <div class="clock-meta">
+      <div class="date-flaps">
+        <div class="date-flap" id="date-day">Lun</div><div class="date-sep">·</div>
+        <div class="date-flap" id="date-num">01</div><div class="date-sep">·</div>
+        <div class="date-flap" id="date-mon">Ene</div><div class="date-sep">·</div>
+        <div class="date-flap" id="date-yr">2025</div>
+      </div>
+      <div class="ampm-badge" id="ampm-badge">AM</div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">Clima <span id="wx-city-lbl">— configurar →</span></div>
+    <div class="weather-inner">
+      <div class="weather-icon-wrap" id="wx-icon">—</div>
+      <div class="weather-right">
+        <div class="weather-city" id="wx-city-name"></div>
+        <div class="weather-temp-row"><div class="weather-temp-big" id="wx-temp">—</div><div class="weather-unit" id="wx-unit">°C</div></div>
+        <div class="weather-desc-txt" id="wx-desc">SIN DATOS</div>
+        <div class="weather-pills"><div class="pill" id="wx-wind">VIENTO —</div><div class="pill" id="wx-hum">HUM —</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">Próximos eventos <span id="cal-lbl">— configurar →</span></div>
+    <div class="cal-inner" id="cal-inner"><div class="no-data">PRESIONAR "CALENDAR" →</div></div>
+  </div>
+  <div class="board-footer">
+    <button class="fbtn" onclick="openWx()">Clima</button>
+    <button class="fbtn primary" onclick="syncAll()">↻ Sync</button>
+    <button class="fbtn" onclick="openCal()">Calendar</button>
+    <button class="fbtn" onclick="openUnits()">°C/°F</button>
+  </div>
+</div>
+<div class="overlay" id="wx-modal"><div class="modal"><div class="modal-hd">Configurar Clima</div><p>INGRESÁ TU CIUDAD. DATOS VÍA OPEN-METEO, SIN CLAVE.</p><input type="text" id="city-inp" placeholder="Ej: Buenos Aires" maxlength="40"/><p class="modal-st" id="wx-st"></p><div class="modal-btns"><button class="mbtn sec" onclick="closeM('wx-modal')">Cancelar</button><button class="mbtn" onclick="saveCity()">Guardar</button></div></div></div>
+<div class="overlay" id="cal-modal"><div class="modal"><div class="modal-hd">Google Calendar</div><p>PEGÁ LA URL PÚBLICA ICAL DE TU GOOGLE CALENDAR.</p><p>CALENDAR → AJUSTES → TU CALENDARIO → INTEGRAR → DIRECCIÓN ICAL PÚBLICA</p><p>SI DA ERROR CORS: https://corsproxy.io/?TU_URL</p><input type="text" id="cal-inp" placeholder="https://calendar.google.com/..." maxlength="500"/><p class="modal-st" id="cal-st"></p><div class="modal-btns"><button class="mbtn sec" onclick="closeM('cal-modal')">Cancelar</button><button class="mbtn" onclick="saveCal()">Guardar</button></div></div></div>
+<div class="overlay" id="units-modal"><div class="modal"><div class="modal-hd">Unidades</div><p>TEMPERATURA:</p><div class="toggle-row"><button class="toggle-btn" id="btn-c" onclick="setU('C')">°C Celsius</button><button class="toggle-btn" id="btn-f" onclick="setU('F')">°F Fahrenheit</button></div><div class="modal-btns"><button class="mbtn sec" onclick="closeM('units-modal')">Cerrar</button></div></div></div>
+<script>
+(function(){
+var use24=false,unit=localStorage.getItem('u')||'C';
+var city=localStorage.getItem('city')||'',calUrl=localStorage.getItem('calUrl')||'';
+var wxData=null;
+var DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+var MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+var pad=function(n){return n<10?'0'+n:''+n;};
+var WMO={0:{i:'☀',d:'Despejado'},1:{i:'🌤',d:'Mayorm. despejado'},2:{i:'⛅',d:'Parcialmente nublado'},3:{i:'☁',d:'Nublado'},45:{i:'🌫',d:'Niebla'},48:{i:'🌫',d:'Niebla con escarcha'},51:{i:'🌦',d:'Llovizna leve'},53:{i:'🌦',d:'Llovizna'},55:{i:'🌧',d:'Llovizna intensa'},61:{i:'🌧',d:'Lluvia leve'},63:{i:'🌧',d:'Lluvia'},65:{i:'🌧',d:'Lluvia intensa'},71:{i:'🌨',d:'Nevada leve'},73:{i:'❄',d:'Nevada'},75:{i:'❄',d:'Nevada intensa'},80:{i:'🌦',d:'Chaparrones'},81:{i:'🌧',d:'Chaparrones'},82:{i:'⛈',d:'Chaparrones fuertes'},95:{i:'⛈',d:'Tormenta'},99:{i:'⛈',d:'Tormenta con granizo'}};
+function setFlap(id,newChar){var top=document.getElementById(id+'-top'),bot=document.getElementById(id+'-bot'),anim=document.getElementById(id+'-anim'),prevEl=document.getElementById(id+'-prev');if(!top||!bot||!anim||!prevEl)return;var current=top.textContent;if(current===newChar)return;prevEl.textContent=current;top.textContent=newChar;bot.textContent=newChar;anim.classList.remove('animating');void anim.offsetWidth;anim.classList.add('animating');setTimeout(function(){anim.classList.remove('animating');},250);}
+function tick(){var n=new Date(),h=n.getHours(),m=n.getMinutes(),s=n.getSeconds(),ap=h>=12?'PM':'AM',dh=use24?h:(h%12||12),hs=pad(dh),ms=pad(m),ss=pad(s);setFlap('h1',hs[0]);setFlap('h2',hs[1]);setFlap('m1',ms[0]);setFlap('m2',ms[1]);setFlap('s1',ss[0]);setFlap('s2',ss[1]);document.getElementById('ampm-badge').textContent=use24?'24H':ap;document.getElementById('date-day').textContent=DAYS[n.getDay()];document.getElementById('date-num').textContent=pad(n.getDate());document.getElementById('date-mon').textContent=MONTHS[n.getMonth()];document.getElementById('date-yr').textContent=n.getFullYear();}
+setInterval(tick,1000);tick();
+function c2f(c){return Math.round(c*9/5+32);}
+function renderWx(data){wxData=data;var cur=data.current,w=WMO[cur.weather_code]||{i:'?',d:'Desconocido'},t=Math.round(cur.temperature_2m),dt=unit==='F'?c2f(t):''+t;document.getElementById('wx-icon').textContent=w.i;document.getElementById('wx-temp').textContent=dt;document.getElementById('wx-unit').textContent=unit==='F'?'°F':'°C';document.getElementById('wx-desc').textContent=w.d.toUpperCase();document.getElementById('wx-wind').textContent='VIENTO '+Math.round(cur.wind_speed_10m)+'KM/H';document.getElementById('wx-hum').textContent='HUM '+Math.round(cur.relative_humidity_2m||0)+'%';document.getElementById('wx-city-lbl').textContent=city.toUpperCase().substring(0,14);document.getElementById('wx-city-name').textContent=city.toUpperCase();}
+function fetchWx(){if(!city)return;var x=new XMLHttpRequest();x.open('GET','/api/weather?city='+encodeURIComponent(city),true);x.onload=function(){try{var data=JSON.parse(x.responseText);if(data.current){renderWx(data);}}catch(e){}};x.send();}
+if(city)fetchWx();setInterval(fetchWx,600000);
+function parseDate(s){if(!s)return null;s=s.replace('Z','');if(s.length<=8)return new Date(+s.substring(0,4),+s.substring(4,6)-1,+s.substring(6,8));return new Date(+s.substring(0,4),+s.substring(4,6)-1,+s.substring(6,8),+s.substring(9,11),+s.substring(11,13));}
+function parseICS(text){var evs=[],lines=text.replace(/\r\n /g,'').replace(/\r\n/g,'\n').split('\n'),ev=null;for(var i=0;i<lines.length;i++){var l=lines[i];if(l==='BEGIN:VEVENT'){ev={};}else if(l==='END:VEVENT'){if(ev&&ev.DTSTART&&ev.SUMMARY)evs.push(ev);ev=null;}else if(ev){var ix=l.indexOf(':');if(ix>0){var k=l.substring(0,ix).split(';')[0];ev[k]=l.substring(ix+1);}}}return evs;}
+function renderCal(evs){var today=new Date();today.setHours(0,0,0,0);var end7=new Date(today.getTime()+7*86400000),up=evs.filter(function(e){var d=parseDate(e.DTSTART);return d&&d>=today&&d<end7;});up.sort(function(a,b){return parseDate(a.DTSTART)-parseDate(b.DTSTART);});up=up.slice(0,4);var ci=document.getElementById('cal-inner');if(!up.length){ci.innerHTML='<div class="no-data">SIN EVENTOS (7 DÍAS)</div>';return;}var html='';up.forEach(function(e){var d=parseDate(e.DTSTART),today2=new Date();today2.setHours(0,0,0,0);var isToday=d>=today2&&d<new Date(today2.getTime()+86400000),ts=e.DTSTART.length<=8?DAYS[d.getDay()]:(isToday?pad(d.getHours())+':'+pad(d.getMinutes()):DAYS[d.getDay()]+' '+pad(d.getHours())+':'+pad(d.getMinutes()));html+='<div class="cal-row"><div class="cal-time-col">'+ts+'</div><div class="cal-title-col">'+((e.SUMMARY||'').substring(0,30))+'</div></div>';});ci.innerHTML=html;document.getElementById('cal-lbl').textContent=up.length+' EVENTO'+(up.length!==1?'S':'');}
+function fetchCal(){if(!calUrl){document.getElementById('cal-inner').innerHTML='<div class="no-data">PRESIONAR "CALENDAR" →</div>';return;}var proxyUrl='/api/calendar?url='+encodeURIComponent(calUrl);var x=new XMLHttpRequest();x.open('GET',proxyUrl,true);x.onload=function(){if(x.status===200){renderCal(parseICS(x.responseText));}else{document.getElementById('cal-inner').innerHTML='<div class="no-data">ERROR '+x.status+'</div>';}};x.onerror=function(){document.getElementById('cal-inner').innerHTML='<div class="no-data">ERROR DE RED</div>';};x.send();}
+if(calUrl)fetchCal();setInterval(fetchCal,300000);
+window.syncAll=function(){fetchWx();fetchCal();};
+window.openWx=function(){document.getElementById('city-inp').value=city;document.getElementById('wx-st').textContent='';document.getElementById('wx-modal').classList.add('on');};
+window.openCal=function(){document.getElementById('cal-inp').value=calUrl;document.getElementById('cal-st').textContent='';document.getElementById('cal-modal').classList.add('on');};
+window.openUnits=function(){document.getElementById('btn-c').className='toggle-btn'+(unit==='C'?' active':'');document.getElementById('btn-f').className='toggle-btn'+(unit==='F'?' active':'');document.getElementById('units-modal').classList.add('on');};
+window.closeM=function(id){document.getElementById(id).classList.remove('on');};
+window.saveCity=function(){var v=document.getElementById('city-inp').value.trim();if(!v){document.getElementById('wx-st').textContent='INGRESÁ UNA CIUDAD';return;}city=v;localStorage.setItem('city',city);document.getElementById('wx-st').textContent='GUARDADO ✓';setTimeout(function(){closeM('wx-modal');fetchWx();},500);};
+window.saveCal=function(){var v=document.getElementById('cal-inp').value.trim();if(!v){document.getElementById('cal-st').textContent='INGRESÁ LA URL';return;}calUrl=v;localStorage.setItem('calUrl',calUrl);document.getElementById('cal-st').textContent='GUARDADO ✓';setTimeout(function(){closeM('cal-modal');fetchCal();},500);};
+window.setU=function(u){unit=u;localStorage.setItem('u',u);if(wxData)renderWx(wxData);document.getElementById('btn-c').className='toggle-btn'+(u==='C'?' active':'');document.getElementById('btn-f').className='toggle-btn'+(u==='F'?' active':'');};
+})();
+</script>
+</body>
+</html>
