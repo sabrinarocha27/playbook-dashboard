@@ -1,240 +1,77 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>Solari Split Flap Clock</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    background: #0a0a0a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-}
-
-.board {
-    background: #111;
-    padding: 30px 24px 24px;
-    border-radius: 8px;
-    box-shadow: 0 0 40px rgba(0,0,0,0.9);
-    width: 90%;
-    max-width: 700px;
-}
-
-.title {
-    color: #555;
-    text-align: center;
-    font-size: 13px;
-    letter-spacing: 6px;
-    margin-bottom: 28px;
-    text-transform: uppercase;
-}
-
-.clock-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-}
-
-.flap {
-    background: linear-gradient(180deg, #222 50%, #1a1a1a 50%);
-    color: #f5f1dc;
-    font-size: 72px;
-    font-weight: bold;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    border-radius: 5px;
-    box-shadow:
-        inset 0 2px 4px rgba(255,255,255,0.06),
-        inset 0 -4px 8px rgba(0,0,0,0.6),
-        0 4px 12px rgba(0,0,0,0.5);
-    /* tamaño responsivo via width relativo al board */
-    width: 13%;
-    padding-top: 15%;
-    /* padding trick para altura proporcional */
-    height: 0;
-    line-height: 0;
-}
-
-/* Truco: el texto flota dentro con position absolute */
-.flap-inner {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 5.5vw;
-}
-
-@media (min-width: 600px) {
-    .flap-inner { font-size: 52px; }
-}
-
-.flap:after {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 2px;
-    background: #000;
-    top: 50%;
-    left: 0;
-    z-index: 2;
-}
-
-.separator {
-    color: #666;
-    font-size: 5vw;
-    line-height: 1;
-    padding-bottom: 4px;
-    flex-shrink: 0;
-}
-
-@media (min-width: 600px) {
-    .separator { font-size: 44px; }
-}
-
-.date-row {
-    text-align: center;
-    margin-top: 22px;
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.date-chip {
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
-    border-radius: 3px;
-    color: #888;
-    font-size: 13px;
-    letter-spacing: 2px;
-    padding: 5px 10px;
-    text-transform: uppercase;
-}
-
-.footer {
-    text-align: center;
-    color: #333;
-    margin-top: 18px;
-    font-size: 10px;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-}
-
-/* Flip animation */
-.flap.flip .flap-inner {
-    animation: flipAnim 0.22s ease;
-}
-
-@keyframes flipAnim {
-    0%   { transform: rotateX(0deg);   opacity: 1; }
-    45%  { transform: rotateX(-90deg); opacity: 0.2; }
-    55%  { transform: rotateX(-90deg); opacity: 0.2; }
-    100% { transform: rotateX(0deg);   opacity: 1; }
-}
-</style>
-</head>
-<body>
-
-<div class="board">
-    <div class="title">Solari Board Terminal</div>
-
-    <div class="clock-row">
-        <div class="flap" id="h1"><div class="flap-inner">0</div></div>
-        <div class="flap" id="h2"><div class="flap-inner">0</div></div>
-        <div class="separator">:</div>
-        <div class="flap" id="m1"><div class="flap-inner">0</div></div>
-        <div class="flap" id="m2"><div class="flap-inner">0</div></div>
-        <div class="separator">:</div>
-        <div class="flap" id="s1"><div class="flap-inner">0</div></div>
-        <div class="flap" id="s2"><div class="flap-inner">0</div></div>
-    </div>
-
-    <div class="date-row">
-        <div class="date-chip" id="date-day">LUN</div>
-        <div class="date-chip" id="date-num">01</div>
-        <div class="date-chip" id="date-mon">ENE</div>
-        <div class="date-chip" id="date-yr">2025</div>
-    </div>
-
-    <div class="footer">BlackBerry PlayBook Edition</div>
-</div>
-
 <script>
 var timer = null;
 
-var DAYS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-var MONTHS = ['Ene','Feb','Mar','Abr','May','Jun',
-              'Jul','Ago','Sep','Oct','Nov','Dic'];
+var DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+var MONTHS = [
+    'Ene','Feb','Mar','Abr','May','Jun',
+    'Jul','Ago','Sep','Oct','Nov','Dic'
+];
 
-function pad(n) {
+function pad(n){
     return (n < 10 ? "0" : "") + n;
 }
 
-function playClick() {
-    try {
-        var Ctx = window.AudioContext || window.webkitAudioContext;
-        if (!Ctx) return;
-        var ctx  = new Ctx();
-        var osc  = ctx.createOscillator();
-        var gain = ctx.createGain();
-        osc.type = "square";
-        osc.frequency.value = 800;
-        gain.gain.value = 0.025;
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.025);
-    } catch(e) {}
-}
-
-function setFlap(id, value) {
-    var el    = document.getElementById(id);
+function setFlap(id, value){
+    var el = document.getElementById(id);
     var inner = el.querySelector(".flap-inner");
-    if (!inner || inner.textContent === value) return;
-    el.classList.remove("flip");
-    void el.offsetWidth;
-    el.classList.add("flip");
-    inner.textContent = value;
-    playClick();
+
+    if(!inner) return;
+
+    if(inner.textContent !== value){
+
+        inner.textContent = value;
+
+        // animación simple compatible
+        el.style.opacity = "0.6";
+
+        setTimeout(function(){
+            el.style.opacity = "1";
+        },100);
+    }
 }
 
-function updateClock() {
-    var now     = new Date();
-    var hours   = pad(now.getHours());
+function updateClock(){
+    var now = new Date();
+
+    var hours = pad(now.getHours());
     var minutes = pad(now.getMinutes());
     var seconds = pad(now.getSeconds());
 
-    setFlap("h1", hours[0]);
-    setFlap("h2", hours[1]);
-    setFlap("m1", minutes[0]);
-    setFlap("m2", minutes[1]);
-    setFlap("s1", seconds[0]);
-    setFlap("s2", seconds[1]);
+    setFlap("h1", hours.charAt(0));
+    setFlap("h2", hours.charAt(1));
 
-    document.getElementById("date-day").textContent = DAYS[now.getDay()];
-    document.getElementById("date-num").textContent = pad(now.getDate());
-    document.getElementById("date-mon").textContent = MONTHS[now.getMonth()];
-    document.getElementById("date-yr").textContent  = now.getFullYear();
+    setFlap("m1", minutes.charAt(0));
+    setFlap("m2", minutes.charAt(1));
+
+    setFlap("s1", seconds.charAt(0));
+    setFlap("s2", seconds.charAt(1));
+
+    document.getElementById("date-day").textContent =
+        DAYS[now.getDay()];
+
+    document.getElementById("date-num").textContent =
+        pad(now.getDate());
+
+    document.getElementById("date-mon").textContent =
+        MONTHS[now.getMonth()];
+
+    document.getElementById("date-yr").textContent =
+        now.getFullYear();
 }
 
-function startClock() {
+function startClock(){
     updateClock();
-    if (timer) { clearInterval(timer); }
-    timer = setInterval(function() { updateClock(); }, 1000);
+
+    if(timer){
+        clearInterval(timer);
+    }
+
+    timer = setInterval(function(){
+        updateClock();
+    },1000);
 }
 
-window.onload = function() { startClock(); };
+window.onload = function(){
+    startClock();
+};
 </script>
-</body>
-</html>
