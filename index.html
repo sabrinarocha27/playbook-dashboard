@@ -1,55 +1,47 @@
 <script>
+var timer = null;
+
 function pad(n){
-    if(n < 10){
-        return "0" + n;
-    }
-    return n;
-}
-
-function setFlap(id,value){
-    var el = document.getElementById(id);
-
-    if(el.textContent !== value){
-        el.textContent = value;
-
-        // pequeño efecto visual sin romper PlayBook
-        el.style.opacity = "0.6";
-
-        setTimeout(function(){
-            el.style.opacity = "1";
-        },80);
-    }
+    return (n < 10 ? "0" : "") + n;
 }
 
 function updateClock(){
+
     var now = new Date();
 
     var hours = pad(now.getHours());
     var minutes = pad(now.getMinutes());
     var seconds = pad(now.getSeconds());
 
-    setFlap("h1", hours.charAt(0));
-    setFlap("h2", hours.charAt(1));
+    document.getElementById("h1").textContent = hours[0];
+    document.getElementById("h2").textContent = hours[1];
 
-    setFlap("m1", minutes.charAt(0));
-    setFlap("m2", minutes.charAt(1));
+    document.getElementById("m1").textContent = minutes[0];
+    document.getElementById("m2").textContent = minutes[1];
 
-    setFlap("s1", seconds.charAt(0));
-    setFlap("s2", seconds.charAt(1));
+    document.getElementById("s1").textContent = seconds[0];
+    document.getElementById("s2").textContent = seconds[1];
 
-    var dateText =
-        pad(now.getDate()) +
-        " / " +
-        pad(now.getMonth() + 1) +
-        " / " +
+    document.getElementById("date").textContent =
+        pad(now.getDate()) + " / " +
+        pad(now.getMonth() + 1) + " / " +
         now.getFullYear();
-
-    document.getElementById("date").textContent = dateText;
-
-    // más estable en navegadores viejos
-    setTimeout(updateClock, 1000);
 }
 
-// iniciar
-updateClock();
+function startClock(){
+
+    updateClock();
+
+    if(timer){
+        clearInterval(timer);
+    }
+
+    timer = setInterval(function(){
+        updateClock();
+    },1000);
+}
+
+window.onload = function(){
+    startClock();
+};
 </script>
